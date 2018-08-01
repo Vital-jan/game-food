@@ -1,0 +1,39 @@
+body {
+    font-family: sans-serif;
+}
+.field {
+    position: relative;
+    border:2px solid gray;
+    width: 400px;
+    height: 400px;
+    margin: 20px;
+}
+.sprite {
+    background-color: yellow;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.sprite:hover {
+    cursor: crosshair;
+}
+.stop-button {
+    position: relative;
+    height: 30px;
+    width: 70px;
+    background-color: red;
+    border:4px solid rgba(248, 245, 59, 0.986);
+    text-align: center;
+    font-weight: bold;
+    line-height: 30px;
+    border-radius:15px;
+    left: 185px;
+    cursor: pointer;
+    z-index:2;
+}
