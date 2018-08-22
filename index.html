@@ -7,26 +7,31 @@
 	<link rel="stylesheet" href="style.css">
 	<title>Game</title>
 </head>
-<body>
+<body id='body'>
 	<div class="field" id='field'>
 	</div>
-	<!--<div class="stop-button" id="stop01">
+	<div class="stop-button" id="stopbutton">
 		Stop
-	</div>-->
+	</div>
 <script>
 // Глобальные переменные
 var fps=30; // частота обновление, кадров/сек
 var interval; // таймер
-var xMax=400, yMax=400;  // размеры игрового поля
-var spriteCount = 3; // к-во спрайтов
-var spriteSize = 100; // размер спрайта в пикселах
+var xMax=800, yMax=400;  // размеры игрового поля
+var spriteSize = 80; // размер спрайта в пикселах
 var spriteIdPrefix = 'sprite';
 var spriteImgFolder = 'img/'; // путь к папке с изображениями
-var spriteImg = ['morkva1.png','kavun1.png','kavun2.png'];
-var spriteTrue = [true,true,true];
+var spriteImg = ['scissors.png','morkva1.png','ambrelle.png','candy.png','sosage.png','cucumber.png','kavun1.png','kavun2.png','ball.png','book.png','strawberry.png','egg.png'];
+var spriteTrue = [false,true,false,true,true,true,true,true,false,false,true,true];
+var spriteCount = spriteImg.length; // к-во спрайтов
 
 function rnd(min, max) { // возвращает случайное целое число от min до max
-	 return Math.floor(Math.random()*(max-min))+min;
+	 return Math.round(Math.random()*(max-min))+min;
+}
+function rndMinus() {
+	var a = rnd(1,2);
+	if (a==2) a=-1;
+	return a;
 }
 
 function getRGB() { // возвращает случайный цвет в rgb-формате
@@ -38,10 +43,10 @@ function getRGB() { // возвращает случайный цвет в rgb-�
 }
 
 
-// stop01.onclick=function () {
-// 	clearInterval(interval);
-// 	document.getElementById("stop01").style.backGroundColor='blue';
-// }
+stopbutton.onclick=function () {
+	clearInterval(interval01);
+	document.getElementById("stopbutton").style.backgroundColor='blue';
+}
 
 // sprite.onclick=function() {
 //  	// sprites[0].click();
@@ -52,53 +57,90 @@ var sprite = {
 	// w:0, h:0, // ширина и высота элемента в пикселах
 	// id:'', // идентификатор html
 	// img:'', // путь к файлу изображения
-	// exist: false, 
 	// isTrue: false, // действие при нажатии (верно-неверно)
-	init: function (id,w,h,x,y,dx,dy,img,isTrue) {
-		this.x=x;
-		this.y=y;
-		this.dx=dx;
-		this.dy=dy;
-		this.w=w;
-		this.h=h;
+	init: function (id) {
+		this.x=rnd(0,xMax-spriteSize);
+		this.y=rnd(0,yMax-spriteSize);
+		this.dx=rnd(50,80)*rndMinus();
+		this.dy=rnd(50,80)*rndMinus();
+		this.w=spriteSize;
+		this.h=spriteSize;
 		this.id=id;
-		this.exist=false;
-		this.img = img;
-		this.isTrue = isTrue;
+		this.exist=true;
+		this.img = '';
+		this.isTrue = false;
 		this.degree = rnd(0,359);
+		this.degreeDelta = rnd(-2,2);
+		if (this.degreeDelta == 0) this.degreeDelta += 1;
+		this.deleting = false; // объект удаляется
+		this.delTiming = fps; // таймер удаления объекта
+
 		this.move=function() {
+			if (this.exist == false) return;
 			ddx=this.dx/fps;
     		ddy=this.dy/fps;
 			this.x+=ddx;
 			this.y+=ddy;
     		document.getElementById(this.id).style.top = Math.round(this.y)+'px';
 			document.getElementById(this.id).style.left = Math.round(this.x)+'px';
+			this.degree = this.degree<360 ? this.degree+this.degreeDelta : 0;
 			document.getElementById(this.id).style.transform = `rotate(${this.degree}deg)`;
-			this.degree = this.degree<360 ? this.degree+1 : 0;
-			if ( (this.x>=xMax-this.w)||(this.x<=0) ) this.dx=-this.dx;
-			if ( (this.y>=yMax-this.h)||(this.y<=0) ) this.dy=-this.dy;
+
+			if ( (this.x>=xMax-this.w)||(this.x<=0) ) { // слева и справа
+				this.dx=-this.dx; // меняем направление движения
+				// меняем направление вращения
+				if (this.dx>0 & this.dy<0) this.degreeDelta=Math.abs(this.degreeDelta)*-1;
+				if (this.dx>0 & this.dy>0 ) this.degreeDelta=Math.abs(this.degreeDelta);
+				if (this.dx<0 & this.dy>0) this.degreeDelta=Math.abs(this.degreeDelta)*-1;
+				if (this.dx<0 & this.dy<0) this.degreeDelta=Math.abs(this.degreeDelta);
+			}
+
+			if ( (this.y>=yMax-this.h)||(this.y<=0) ) { // сверху и снизу
+				this.dy=-this.dy; // меняем направление движения
+				// меняем направление вращения
+				if (this.dx>0 & this.dy>0 ) this.degreeDelta=Math.abs(this.degreeDelta)*-1;
+				if (this.dx<0 & this.dy>0) this.degreeDelta=Math.abs(this.degreeDelta);
+				if (this.dx<0 & this.dy<0) this.degreeDelta=Math.abs(this.degreeDelta)*-1;
+				if (this.dx>0 & this.dy<0) this.degreeDelta=Math.abs(this.degreeDelta);
+			}
+			// удаление объекта
+			if (this.deleting) {
+				this.delTiming--;
+				document.getElementById(this.id).style.opacity = (this.delTiming / fps)+'';
+				if (this.delTiming==0) {
+					this.delTiming=fps;
+					this.deleting=false;
+					this.exist=false;
+				}
+			}
 		};
 		this.click = function () {
-		this.dx+=rnd(0,50);
-		this.dy+=rnd(0,50);
-		this.degree=0;
+			if (this.exist == false) return;
+			this.deleting = true;
 	};
 	}
 }
+// Определяем разм экрана
+xMax = Math.round(document.getElementById('body').clientWidth*0.8);
+yMax = Math.round(document.getElementById('body').clientHeight*0.8);
 
 // инициализация массива спрайтов ----------------------------
 var sprites=[]; // массив спрайтов
 var s = ''; // HTML массива спрайтов
-for (n = 0; n < spriteCount; n++) {
-	sprites.push(new sprite.init(`sprite${n}`,spriteSize,spriteSize,100*n,100*n,50,80,'',spriteTrue[n]));
+for (n = 0; n < spriteCount; n++) { // создаем html массива спрайтов
+	sprites.push(new sprite.init(`sprite${n}`));
 	s += `<div class="sprite" id="sprite${n}"></div>`;
 }
-
+// отрисовка рабочей области
+document.getElementById('field').style.width = `${xMax}px`;
+document.getElementById('field').style.height = `${yMax}px`;
 document.getElementById('field').innerHTML=s;
 
-for (n = 0; n < spriteCount; n++) {
-	document.getElementById(`${spriteIdPrefix}${n}`).style.backgroundImage = `url("${spriteImgFolder}${spriteImg[n]}")`;
-	document.getElementById(`${spriteIdPrefix}${n}`).onclick=function(){
+for (n = 0; n < spriteCount; n++) { // инициализируем html массива спрайтов
+	document.getElementById(`${spriteIdPrefix}${n}`).style.backgroundImage = `url("${spriteImgFolder}${spriteImg[n]}")`; // путь к файлу изобрабражения
+	document.getElementById(`${spriteIdPrefix}${n}`).style.width = `${spriteSize}px`;// размеры спрайтов
+	document.getElementById(`${spriteIdPrefix}${n}`).style.height = `${spriteSize}px`;// размеры спрайтов
+	document.getElementById(`${spriteIdPrefix}${n}`).onclick=function(){ // назначаем свойство onclick
 		var s=this.id.substr(spriteIdPrefix.length,this.id.length);
 		s=+s;
 		sprites[s].click();
@@ -106,7 +148,7 @@ for (n = 0; n < spriteCount; n++) {
 }
 //----------------------------------------
 
-interval01=setInterval(function() {
+var interval01=setInterval(function() {
 	for (n = 0; n < spriteCount; n++) sprites[n].move();
 },1000/fps);
 

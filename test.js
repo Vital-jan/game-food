@@ -22,3 +22,11 @@ a
 
 a[2].move();
 a
+
+
+function rnd(min, max) { // возвращает случайное целое число от min до max
+    return Math.round(Math.random()*(max-min))+min;
+}
+for (t=0; t<100; t++) {
+    console.log(rnd(-10,10));
+}
