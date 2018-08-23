@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" href="style.css">
 	<title>Game</title>
 </head>
@@ -21,7 +22,8 @@ var xMax=800, yMax=400;  // размеры игрового поля
 var spriteSize = 80; // размер спрайта в пикселах
 var spriteIdPrefix = 'sprite';
 var spriteImgFolder = 'img/'; // путь к папке с изображениями
-var spriteImg = ['scissors.png','morkva1.png','ambrelle.png','candy.png','sosage.png','cucumber.png','kavun1.png','kavun2.png','ball.png','book.png','strawberry.png','egg.png'];
+var spriteImg = ['ball.png','clock.png','apple2.png','apple.png','ball3.png','ball2.png','car.png','sosage.png','strawberry.png','kavun2.png','kavun1.png','book.png','egg.png','phone.png','boot.png','ice2.png','ice.png','morkva2.png','pencil.png','cucumber.png','candy.png','banan.png','ambrelle.png','cherry.png','morkva.png','scissors.png'];
+
 var spriteTrue = [false,true,false,true,true,true,true,true,false,false,true,true];
 var spriteCount = spriteImg.length; // к-во спрайтов
 
@@ -121,8 +123,8 @@ var sprite = {
 	}
 }
 // Определяем разм экрана
-xMax = Math.round(document.getElementById('body').clientWidth*0.8);
-yMax = Math.round(document.getElementById('body').clientHeight*0.8);
+xMax = Math.round(document.getElementById('body').clientWidth*.95);
+yMax = Math.round(document.getElementById('body').clientHeight*0.85);
 
 // инициализация массива спрайтов ----------------------------
 var sprites=[]; // массив спрайтов

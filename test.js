@@ -30,3 +30,13 @@ function rnd(min, max) { // возвращает случайное целое �
 for (t=0; t<100; t++) {
     console.log(rnd(-10,10));
 }
+var spriteImg = ['scissors.png','morkva.png','cherry.png','ambrelle.png','banan.png','candy.png','cucumber.png','pencil.png','morkva2.png','ice.png','ice2.png','boot.png','phone.png','egg.png','book.png','kavun1.png','kavun2.png','strawberry.png','sosage.png','car.png','ball2.png','ball3.png','apple.png','apple2.png','clock.png','ball.png'];
+var e = [];
+m=spriteImg.length;
+
+
+for (n=0; n<m; n++) {
+    e[25-n]=spriteImg[n];
+}
+console.log(e);
+
