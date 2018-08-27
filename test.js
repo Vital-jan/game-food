@@ -1,42 +1,32 @@
 
-var a =  [];
-
-var obj = {
-    name:'123',
-    number:0,
-    init: function(name,number){
-        this.name=name;
-        this.number=number;
-        this.move = function() {
-            this.number+=50;;
-        }
-    }
-}
-
-for (var n=0; n<3; n++) {
-    a.push(new obj.init(n,n));
-}
-
-a[2].name='qqqqqqqqqqqqqqqqq';
-a
-
-a[2].move();
-a
-
-
 function rnd(min, max) { // возвращает случайное целое число от min до max
     return Math.round(Math.random()*(max-min))+min;
 }
-for (t=0; t<100; t++) {
-    console.log(rnd(-10,10));
-}
-var spriteImg = ['scissors.png','morkva.png','cherry.png','ambrelle.png','banan.png','candy.png','cucumber.png','pencil.png','morkva2.png','ice.png','ice2.png','boot.png','phone.png','egg.png','book.png','kavun1.png','kavun2.png','strawberry.png','sosage.png','car.png','ball2.png','ball3.png','apple.png','apple2.png','clock.png','ball.png'];
-var e = [];
-m=spriteImg.length;
 
+var spriteCount=5;
+var spriteView = 3;
 
-for (n=0; n<m; n++) {
-    e[25-n]=spriteImg[n];
+var sprite={
+    exist:false,
+    init:function() {
+        this.exist = false;
+    }
+};
+var sprites = [];
+for (n=0; n<spriteCount; n++) {
+    sprites.push(new (sprite.init));
 }
-console.log(e);
+for (var n = 1; n <= spriteView; n++) {
+    var j = rnd(0,spriteCount-1);
+    j
+
+          while (sprites[j].exist) {
+            j++;
+            if (j == spriteCount) j = 0;
+         }
+
+          sprites[j].exist = true;
+
+        }
+ console.log(sprites);
 

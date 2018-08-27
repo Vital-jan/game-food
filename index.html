@@ -15,7 +15,7 @@
 		Stop
 	</div>
 <script>
-// Глобальные переменные
+// ---------- Глобальные переменные
 var fps=30; // частота обновление, кадров/сек
 var interval; // таймер
 var xMax=800, yMax=400;  // размеры игрового поля
@@ -26,23 +26,24 @@ var spriteImg = ['ball.png','clock.png','apple2.png','apple.png','ball3.png','ba
 
 var spriteTrue = [false,true,false,true,true,true,true,true,false,false,true,true];
 var spriteCount = spriteImg.length; // к-во спрайтов
+var spriteView = spriteCount; // к-во одновременно видимых спрайтов. зависит от разм. экрана
 
 function rnd(min, max) { // возвращает случайное целое число от min до max
 	 return Math.round(Math.random()*(max-min))+min;
 }
-function rndMinus() {
+function rndMinus() { // случ. число 1 или -1
 	var a = rnd(1,2);
 	if (a==2) a=-1;
 	return a;
 }
 
-function getRGB() { // возвращает случайный цвет в rgb-формате
-	var r,g,b;
-	r=rnd(0,255);
-	g=rnd(0,255);
-	b=rnd(0,255);
-	return `rgb(${r},${g},${b})`;
-}
+// function getRGB() { // возвращает случайный цвет в rgb-формате
+// 	var r,g,b;
+// 	r=rnd(0,255);
+// 	g=rnd(0,255);
+// 	b=rnd(0,255);
+// 	return `rgb(${r},${g},${b})`;
+// }
 
 
 stopbutton.onclick=function () {
@@ -68,7 +69,7 @@ var sprite = {
 		this.w=spriteSize;
 		this.h=spriteSize;
 		this.id=id;
-		this.exist=true;
+		this.exist=false;
 		this.img = '';
 		this.isTrue = false;
 		this.degree = rnd(0,359);
@@ -76,6 +77,24 @@ var sprite = {
 		if (this.degreeDelta == 0) this.degreeDelta += 1;
 		this.deleting = false; // объект удаляется
 		this.delTiming = fps; // таймер удаления объекта
+		this.burning = true;  // объект создается
+		this.burnTiming = fps;  // таймер создания объекта
+
+		this.burn = function() {
+			this.x=rnd(0,xMax-spriteSize);
+			this.y=rnd(0,yMax-spriteSize);
+			this.dx=rnd(50,80)*rndMinus();
+			this.dy=rnd(50,80)*rndMinus();
+			this.exist=true;
+			this.degree = rnd(0,359);
+			this.degreeDelta = rnd(-2,2);
+			if (this.degreeDelta == 0) this.degreeDelta += 1;
+			this.deleting = false; 
+			this.delTiming = fps;
+			this.burning = true;
+			this.burnTiming = fps;
+
+		}
 
 		this.move=function() {
 			if (this.exist == false) return;
@@ -113,8 +132,20 @@ var sprite = {
 					this.delTiming=fps;
 					this.deleting=false;
 					this.exist=false;
+					burn();
 				}
 			}
+			// создание объекта
+			if (this.burning) {
+				this.burning--;
+				document.getElementById(this.id).style.opacity = (this.burnTiming / fps)+'';
+				if (this.burnTiming==0) {
+					this.burnTiming=fps;
+					this.burning=false;
+					this.exist=true;
+				}
+			}
+			
 		};
 		this.click = function () {
 			if (this.exist == false) return;
@@ -126,6 +157,8 @@ var sprite = {
 xMax = Math.round(document.getElementById('body').clientWidth*.95);
 yMax = Math.round(document.getElementById('body').clientHeight*0.85);
 
+spriteView = Math.ceil((xMax * yMax) / (spriteSize * spriteSize) / 4); // вычисляем к-во одновременно видимых спрайтов
+spriteView = spriteView > spriteCount ? spriteCount : spriteView;
 // инициализация массива спрайтов ----------------------------
 var sprites=[]; // массив спрайтов
 var s = ''; // HTML массива спрайтов
@@ -138,11 +171,27 @@ document.getElementById('field').style.width = `${xMax}px`;
 document.getElementById('field').style.height = `${yMax}px`;
 document.getElementById('field').innerHTML=s;
 
+// делаем часть спрайтов существующими
+for (var n = 1; n <= spriteView; n++) {
+    var j = rnd(0,spriteCount-1);
+    j
+
+          while (sprites[j].exist) {
+            j++;
+            if (j == spriteCount) j = 0;
+         }
+
+          sprites[j].exist = true;
+
+        }
+
 for (n = 0; n < spriteCount; n++) { // инициализируем html массива спрайтов
 	document.getElementById(`${spriteIdPrefix}${n}`).style.backgroundImage = `url("${spriteImgFolder}${spriteImg[n]}")`; // путь к файлу изобрабражения
 	document.getElementById(`${spriteIdPrefix}${n}`).style.width = `${spriteSize}px`;// размеры спрайтов
 	document.getElementById(`${spriteIdPrefix}${n}`).style.height = `${spriteSize}px`;// размеры спрайтов
-	document.getElementById(`${spriteIdPrefix}${n}`).onclick=function(){ // назначаем свойство onclick
+	document.getElementById(`${spriteIdPrefix}${n}`).style.zIndex = n;
+	document.getElementById(`${spriteIdPrefix}${n}`).style.visibility = sprites[n].exist == true ? 'visible' : 'hidden';
+	document.getElementById(`${spriteIdPrefix}${n}`).onclick=function() { // назначаем свойство onclick
 		var s=this.id.substr(spriteIdPrefix.length,this.id.length);
 		s=+s;
 		sprites[s].click();
