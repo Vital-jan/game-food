@@ -30,3 +30,14 @@ for (var n = 1; n <= spriteView; n++) {
         }
  console.log(sprites);
 
+ var j = rnd(0,spriteCount-1);
+ j
+ 
+ while (sprites[j].exist) {
+   j++;
+   if (j == spriteCount) j = 0;
+ }
+j
+
+
+

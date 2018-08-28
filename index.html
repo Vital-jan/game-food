@@ -27,6 +27,7 @@ var spriteImg = ['ball.png','clock.png','apple2.png','apple.png','ball3.png','ba
 var spriteTrue = [false,true,false,true,true,true,true,true,false,false,true,true];
 var spriteCount = spriteImg.length; // к-во спрайтов
 var spriteView = spriteCount; // к-во одновременно видимых спрайтов. зависит от разм. экрана
+var spriteViewMax = 20; // ограничение макс. к-ва видимых спрайтов
 
 function rnd(min, max) { // возвращает случайное целое число от min до max
 	 return Math.round(Math.random()*(max-min))+min;
@@ -79,6 +80,8 @@ var sprite = {
 		this.delTiming = fps; // таймер удаления объекта
 		this.burning = true;  // объект создается
 		this.burnTiming = fps;  // таймер создания объекта
+		this.burnOpacityPlus = 1 / this.burnTiming;
+		this.burnOpacity = 0;
 
 		this.burn = function() {
 			this.x=rnd(0,xMax-spriteSize);
@@ -87,13 +90,14 @@ var sprite = {
 			this.dy=rnd(50,80)*rndMinus();
 			this.exist=true;
 			this.degree = rnd(0,359);
-			this.degreeDelta = rnd(-2,2);
+			this.degreeDelta = rnd(-3,3);
 			if (this.degreeDelta == 0) this.degreeDelta += 1;
 			this.deleting = false; 
 			this.delTiming = fps;
 			this.burning = true;
 			this.burnTiming = fps;
-
+			this.burnOpacityPlus = 1 / this.burnTiming;
+			this.burnOpacity = 0;
 		}
 
 		this.move=function() {
@@ -132,23 +136,30 @@ var sprite = {
 					this.delTiming=fps;
 					this.deleting=false;
 					this.exist=false;
-					burn();
+
+					// оживляем другой спрайт
+					var j = rnd(0,spriteCount-1);
+					while (sprites[j].exist) {
+  					j++;
+  					if (j == spriteCount) j = 0;
+					}
+					sprites[j].burn();
 				}
 			}
 			// создание объекта
 			if (this.burning) {
-				this.burning--;
-				document.getElementById(this.id).style.opacity = (this.burnTiming / fps)+'';
+				this.burnTiming--;
+				document.getElementById(this.id).style.opacity = this.burnOpacity+'';
+				document.getElementById(this.id).style.visibility = 'visible';
+				this.burnOpacity += this.burnOpacityPlus;
 				if (this.burnTiming==0) {
-					this.burnTiming=fps;
 					this.burning=false;
-					this.exist=true;
 				}
 			}
 			
 		};
 		this.click = function () {
-			if (this.exist == false) return;
+			if (this.deleting) return;
 			this.deleting = true;
 	};
 	}
@@ -159,6 +170,7 @@ yMax = Math.round(document.getElementById('body').clientHeight*0.85);
 
 spriteView = Math.ceil((xMax * yMax) / (spriteSize * spriteSize) / 4); // вычисляем к-во одновременно видимых спрайтов
 spriteView = spriteView > spriteCount ? spriteCount : spriteView;
+spriteView = spriteView > spriteViewMax ? spriteViewMax : spriteView;
 // инициализация массива спрайтов ----------------------------
 var sprites=[]; // массив спрайтов
 var s = ''; // HTML массива спрайтов
@@ -174,7 +186,6 @@ document.getElementById('field').innerHTML=s;
 // делаем часть спрайтов существующими
 for (var n = 1; n <= spriteView; n++) {
     var j = rnd(0,spriteCount-1);
-    j
 
           while (sprites[j].exist) {
             j++;
