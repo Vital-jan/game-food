@@ -7,8 +7,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" href="style.css">
 	<title>Game</title>
+	<script src="test.js"></script>
 </head>
-<body id='body'>
+<body id='body' onload='play()'>
 	<div class="field" id='field'>
 	</div>
 	<div class="stop-button" id="stopbutton">
@@ -16,36 +17,27 @@
 	</div>
 <script>
 // ---------- Глобальные переменные
-var fps=30; // частота обновление, кадров/сек
-var interval; // таймер
-var xMax=800, yMax=400;  // размеры игрового поля
-var spriteSize = 80; // размер спрайта в пикселах
-var spriteIdPrefix = 'sprite';
-var spriteImgFolder = 'img/'; // путь к папке с изображениями
-var spriteImg = ['ball.png','clock.png','apple2.png','apple.png','ball3.png','ball2.png','car.png','sosage.png','strawberry.png','kavun2.png','kavun1.png','book.png','egg.png','phone.png','boot.png','ice2.png','ice.png','morkva2.png','pencil.png','cucumber.png','candy.png','banan.png','ambrelle.png','cherry.png','morkva.png','scissors.png'];
+const fps=30; // частота обновление, кадров/сек
+let interval; // таймер
+let xMax=800, yMax=400;  // размеры игрового поля
+const spriteSize = 80; // размер спрайта в пикселах
+const spriteIdPrefix = 'sprite';
+const spriteImgFolder = 'img/'; // путь к папке с изображениями
+const spriteImg = ['orange2.png','tomat.png','cheese.png','cookies.png','ball.png','clock.png','apple2.png','apple.png','ball3.png','ball2.png','car.png','cap.png','bred.png','sosage.png','strawberry.png','kavun2.png','kavun1.png','book.png','phone2.png','chair.png','egg.png','phone.png','boot.png','ice2.png','ice.png','morkva2.png','pencil.png','cucumber.png','candy.png','candy2.png','banan.png','ambrelle.png','cherry.png','morkva.png','scissors.png'];
 
-var spriteTrue = [false,true,false,true,true,true,true,true,false,false,true,true];
-var spriteCount = spriteImg.length; // к-во спрайтов
-var spriteView = spriteCount; // к-во одновременно видимых спрайтов. зависит от разм. экрана
-var spriteViewMax = 20; // ограничение макс. к-ва видимых спрайтов
+const spriteTrue = [1,1,1,1,0,0,1,1,0,0,0,0,1,1,1,1,1,0,0,0,1,0,0,1,1,1,0,1,1,1,1,0,1,1,0];
+let spriteCount = spriteImg.length; // к-во спрайтов
+let spriteView = spriteCount; // к-во одновременно видимых спрайтов. зависит от разм. экрана
+let spriteViewMax = 20; // ограничение макс. к-ва видимых спрайтов
 
 function rnd(min, max) { // возвращает случайное целое число от min до max
 	 return Math.round(Math.random()*(max-min))+min;
 }
 function rndMinus() { // случ. число 1 или -1
-	var a = rnd(1,2);
+	let a = rnd(1,2);
 	if (a==2) a=-1;
 	return a;
 }
-
-// function getRGB() { // возвращает случайный цвет в rgb-формате
-// 	var r,g,b;
-// 	r=rnd(0,255);
-// 	g=rnd(0,255);
-// 	b=rnd(0,255);
-// 	return `rgb(${r},${g},${b})`;
-// }
-
 
 stopbutton.onclick=function () {
 	clearInterval(interval01);
@@ -55,14 +47,14 @@ stopbutton.onclick=function () {
 // sprite.onclick=function() {
 //  	// sprites[0].click();
 // }
-var sprite = {
+class sprite {
 	// x:0, y:0, // текущие координаты
 	// dx:0, dy:0, // смещение (px/sec)
 	// w:0, h:0, // ширина и высота элемента в пикселах
 	// id:'', // идентификатор html
 	// img:'', // путь к файлу изображения
 	// isTrue: false, // действие при нажатии (верно-неверно)
-	init: function (id) {
+	constructor (id, isTrue) {
 		this.x=rnd(0,xMax-spriteSize);
 		this.y=rnd(0,yMax-spriteSize);
 		this.dx=rnd(50,80)*rndMinus();
@@ -72,7 +64,7 @@ var sprite = {
 		this.id=id;
 		this.exist=false;
 		this.img = '';
-		this.isTrue = false;
+		this.isTrue = isTrue;
 		this.degree = rnd(0,359);
 		this.degreeDelta = rnd(-2,2);
 		if (this.degreeDelta == 0) this.degreeDelta += 1;
@@ -82,8 +74,9 @@ var sprite = {
 		this.burnTiming = fps;  // таймер создания объекта
 		this.burnOpacityPlus = 1 / this.burnTiming;
 		this.burnOpacity = 0;
-
-		this.burn = function() {
+		this.sound = new Audio('');
+	}
+		burn () {
 			this.x=rnd(0,xMax-spriteSize);
 			this.y=rnd(0,yMax-spriteSize);
 			this.dx=rnd(50,80)*rndMinus();
@@ -100,10 +93,10 @@ var sprite = {
 			this.burnOpacity = 0;
 		}
 
-		this.move=function() {
+		move () {
 			if (this.exist == false) return;
-			ddx=this.dx/fps;
-    		ddy=this.dy/fps;
+			let ddx=this.dx/fps;
+    		let ddy=this.dy/fps;
 			this.x+=ddx;
 			this.y+=ddy;
     		document.getElementById(this.id).style.top = Math.round(this.y)+'px';
@@ -138,7 +131,7 @@ var sprite = {
 					this.exist=false;
 
 					// оживляем другой спрайт
-					var j = rnd(0,spriteCount-1);
+					let j = rnd(0,spriteCount-1);
 					while (sprites[j].exist) {
   					j++;
   					if (j == spriteCount) j = 0;
@@ -158,11 +151,15 @@ var sprite = {
 			}
 			
 		};
-		this.click = function () {
+
+		click () {
 			if (this.deleting) return;
 			this.deleting = true;
+			let r = rnd(1,4);
+			let snd = this.isTrue ? `up${r}.wav` : `down${r}.wav`;
+			this.sound.src = snd;
+			this.sound.play();
 	};
-	}
 }
 // Определяем разм экрана
 xMax = Math.round(document.getElementById('body').clientWidth*.95);
@@ -171,11 +168,12 @@ yMax = Math.round(document.getElementById('body').clientHeight*0.85);
 spriteView = Math.ceil((xMax * yMax) / (spriteSize * spriteSize) / 4); // вычисляем к-во одновременно видимых спрайтов
 spriteView = spriteView > spriteCount ? spriteCount : spriteView;
 spriteView = spriteView > spriteViewMax ? spriteViewMax : spriteView;
+
 // инициализация массива спрайтов ----------------------------
-var sprites=[]; // массив спрайтов
-var s = ''; // HTML массива спрайтов
+let sprites=[]; // массив спрайтов
+let s = ''; // HTML массива спрайтов
 for (n = 0; n < spriteCount; n++) { // создаем html массива спрайтов
-	sprites.push(new sprite.init(`sprite${n}`));
+	sprites.push(new sprite(`sprite${n}`,spriteTrue[n]));
 	s += `<div class="sprite" id="sprite${n}"></div>`;
 }
 // отрисовка рабочей области
@@ -184,8 +182,8 @@ document.getElementById('field').style.height = `${yMax}px`;
 document.getElementById('field').innerHTML=s;
 
 // делаем часть спрайтов существующими
-for (var n = 1; n <= spriteView; n++) {
-    var j = rnd(0,spriteCount-1);
+for (let n = 1; n <= spriteView; n++) {
+    let j = rnd(0,spriteCount-1);
 
           while (sprites[j].exist) {
             j++;
@@ -203,14 +201,17 @@ for (n = 0; n < spriteCount; n++) { // инициализируем html мас�
 	document.getElementById(`${spriteIdPrefix}${n}`).style.zIndex = n;
 	document.getElementById(`${spriteIdPrefix}${n}`).style.visibility = sprites[n].exist == true ? 'visible' : 'hidden';
 	document.getElementById(`${spriteIdPrefix}${n}`).onclick=function() { // назначаем свойство onclick
-		var s=this.id.substr(spriteIdPrefix.length,this.id.length);
+		let s=this.id.substr(spriteIdPrefix.length,this.id.length);
 		s=+s;
 		sprites[s].click();
 	 }
 }
-//----------------------------------------
+window.onload= function() {
+ 	let hihi = new Audio ('hihi.wav');
+	hihi.play();
+};
 
-var interval01=setInterval(function() {
+let interval01=setInterval(function() {
 	for (n = 0; n < spriteCount; n++) sprites[n].move();
 },1000/fps);
 
